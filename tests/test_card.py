@@ -47,6 +47,27 @@ class TestCard(unittest.TestCase):
         self.assertEqual(card.value, 11)
         self.assertEqual(card.is_ace, 1)
 
+    def test_02_card_equals(self):
+
+        # Same card
+        suit = "Diamond"
+        rank = "2"
+        card = Card(suit=suit, rank=rank)
+        other = Card(suit=suit, rank=rank)
+        self.assertEqual(card, other)
+
+        # Same suit different ranks
+        other = Card(suit="Diamond", rank="3")
+        self.assertNotEqual(card, other)
+
+        # Different suits same ranks
+        other = Card(suit="Spade", rank="2")
+        self.assertNotEqual(card, other)
+
+        # Different suits different ranks
+        other = Card(suit="Heart", rank="Q")
+        self.assertNotEqual(card, other)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -14,8 +14,20 @@ class Card:
     def is_ace(self) -> int:
         return (self.rank == "A") * 1
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.rank} of {self.suit}s"
+
+    def __str__(self) -> str:
+        return f"{self.rank} of {self.suit}s"
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Card):
+            return False
+
+        return self.suit == other.suit and self.rank == other.rank
+
+    def __hash__(self) -> bool:
+        return hash(f"{self.rank} of {self.suit}s")
 
     @property
     def value(self):
@@ -38,8 +50,11 @@ class Card:
 
 class Shoe:
     def __init__(self, num_decks: int, random_state: int | None = None):
+
+        if not isinstance(num_decks, int):
+            raise TypeError(f"Number of decks must be type int, Got {type(num_decks)}")
         if num_decks < 1:
-            raise ValueError("Number of decks must be greater than 0.")
+            raise ValueError(f"Number of decks must be greater than 0. Got {num_decks}")
 
         if not isinstance(random_state, int | None):
             raise TypeError("Random state must be int or None")
