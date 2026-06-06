@@ -114,7 +114,7 @@ class Hand:
 
         self.wager = wager
         self.cards = [card1, card2]
-        self.standed = False
+        self.stood = False
         self.split_aces = split_aces
 
     @property
@@ -134,7 +134,11 @@ class Hand:
     def can_hit(self) -> bool:
         """Determines if hand can hit"""
 
-        return self.value < 21
+        if (self.value >= 21) or (self.split_aces):
+            # Can't hit on 21 and can't hit after splitting aces
+            return False
+
+        return True
 
     @property
     def can_split(self) -> bool:
@@ -159,7 +163,8 @@ class Hand:
         if len(self.cards) != 2:
             return False
 
-        if self.value == 21:
+        if (self.value == 21) or (self.split_aces):
+            # Can't double on 21 and can't double after splitting
             return False
 
         return True
@@ -187,10 +192,7 @@ class Hand:
     def is_hand_locked(self) -> bool:
         """Determines if hand is still active"""
 
-        if self.value > 20:
-            return True
-
-        if self.standed:
+        if (self.value >= 21) or (self.split_aces) or (self.stood):
             return True
 
         return False
@@ -209,7 +211,7 @@ class Hand:
     def stand(self):
         """Takes action to stand"""
 
-        self.standed = True
+        self.stood = True
 
     def double(self, card: Card):
         """Takes action to double"""

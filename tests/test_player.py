@@ -152,9 +152,8 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(player.hands[2].value, 19)
         self.assertEqual(player.active_hand, 3)
 
-        # Check player not enough cash
+        ## Check player not enough cash
         player = Player(cash=1)
-        # Deal out cards to table
         shoe = Shoe(num_decks=1, random_state=224)  # Always split 8's
         card1 = shoe.draw()
         _ = shoe.draw()  # Dealer card
@@ -164,6 +163,18 @@ class TestPlayer(unittest.TestCase):
 
         with self.assertRaises(InvalidAction):
             shoe = player.take_action("split", shoe)
+
+        ## Testing player trying to split A's twice
+        player = Player(cash=100)
+        shoe = Shoe(num_decks=1, random_state=12154)
+        card1 = shoe.draw()
+        _ = shoe.draw()  # Dealer card
+        card2 = shoe.draw()
+        _ = shoe.draw()  # Dealer card
+        player.deal(wager=1, card1=card1, card2=card2)  # Has pair Aces
+        shoe = player.take_action("split", shoe)
+
+        # Player's hands are locked
 
 
 if __name__ == "__main__":

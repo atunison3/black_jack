@@ -600,8 +600,14 @@ class TestHand(unittest.TestCase):
         # Post-split asserts
         self.assertEqual(hand1.value, 12)
         self.assertEqual(hand1.can_split, False)
+        self.assertEqual(hand1.can_hit, False)
+        self.assertEqual(hand1.can_double, False)
+        self.assertEqual(hand1.is_hand_locked, True)
         self.assertEqual(hand2.value, 21)
         self.assertEqual(hand2.can_split, False)
+        self.assertEqual(hand2.can_hit, False)
+        self.assertEqual(hand2.can_double, False)
+        self.assertEqual(hand2.is_hand_locked, True)
 
     def test_doubling(self):
 
