@@ -85,14 +85,15 @@ class Shoe:
 
 
 class Hand:
-    def __init__(self, wager: int, card1: Card, card2: Card):
+    def __init__(self, wager: int, card1: Card, card2: Card, split_aces: bool = False):
 
         if wager < 1:
             raise ValueError("Wager must be greater than 0")
 
         self.wager = wager
         self.cards = [card1, card2]
-        self.stayed = False
+        self.standed = False
+        self.split_aces = split_aces
 
     @property
     def value(self) -> int:
@@ -111,7 +112,7 @@ class Hand:
     def can_hit(self) -> bool:
         """Determines if hand can hit"""
 
-        return self.is_hand_bust
+        return self.value < 21
 
     @property
     def can_split(self) -> bool:
@@ -123,6 +124,10 @@ class Hand:
         if self.cards[0].rank != self.cards[1].rank:
             return False
 
+        if self.cards[0].rank == "A" and self.split_aces:
+            # Can't split aces more than once
+            return False
+
         return True
 
     @property
@@ -132,7 +137,20 @@ class Hand:
         if len(self.cards) != 2:
             return False
 
+        if self.value == 21:
+            return False
+
         return True
+
+    @property
+    def is_hand_soft(self) -> bool:
+        """Determines if hand is soft or not"""
+
+        for card in self.cards:
+            if card.rank == "A":
+                return True
+
+        return False
 
     @property
     def is_hand_bust(self) -> bool:
@@ -144,13 +162,13 @@ class Hand:
         return False
 
     @property
-    def is_hand_dead(self) -> bool:
+    def is_hand_locked(self) -> bool:
         """Determines if hand is still active"""
 
-        if self.is_hand_bust:
+        if self.value > 20:
             return True
 
-        if self.stayed:
+        if self.standed:
             return True
 
         return False
@@ -166,10 +184,10 @@ class Hand:
 
         self.cards.append(card)
 
-    def stay(self):
-        """Takes action to stay"""
+    def stand(self):
+        """Takes action to stand"""
 
-        self.stayed = True
+        self.standed = True
 
     def double(self, card: Card):
         """Takes action to double"""
@@ -181,10 +199,15 @@ class Hand:
         """Takes action to split the hand"""
 
         # Create a new hand
-        new_hand = Hand(self.wager, self.cards[1], card2)
+        if self.cards[1].rank == "A" and card2.rank == "A":
+            new_hand = Hand(self.wager, self.cards[1], card2, split_aces=True)
+        else:
+            new_hand = Hand(self.wager, self.cards[1], card2)
 
         # Replace the "split" card with the new card
         self.cards[1] = card1
+        if self.cards[0].rank == "A" and self.cards[1].rank == "A":
+            self.split_aces = True
 
         return new_hand
 
@@ -206,7 +229,7 @@ class Player:
         self.active_hand = 0
 
     def decide(self, action: str, shoe: Shoe) -> None:
-        """Takes an action to hit, stay, double, or split"""
+        """Takes an action to hit, stand, double, or split"""
 
         if action == "hit":
             # Draw a card
@@ -214,12 +237,12 @@ class Player:
             self.hands[self.active_hand].hit(card)
 
             # If hand is bust: move to next hand
-            if self.hands[self.active_hand].is_hand_dead:
+            if self.hands[self.active_hand].is_hand_locked:
                 self.active_hand += 1
 
-        elif action == "stay":
-            # Perform stay action
-            self.hands[self.active_hand].stay()
+        elif action == "stand":
+            # Perform stand action
+            self.hands[self.active_hand].stand()
 
             # Move to next hand
             self.active_hand += 1
@@ -249,40 +272,40 @@ def decide_player_action(hand: Hand, dealer: Card, count: int = 0) -> str:
     """Decides what action to take"""
 
     if hand.value == 21:
-        return "stay"
+        return "stand"
     elif hand.value == 20:
-        return "stay"
+        return "stand"
     elif hand.value == 19:
-        return "stay"
+        return "stand"
     elif hand.value == 18:
-        return "stay"
+        return "stand"
     elif hand.value == 17:
-        return "stay"
+        return "stand"
     elif hand.value == 16:
         if dealer.value > 16:
             return "hit"
         else:
-            return "stay"
+            return "stand"
     elif hand.value == 15:
         if dealer.value > 16:
             return "hit"
         else:
-            return "stay"
+            return "stand"
     elif hand.value == 14:
         if dealer.value > 16:
             return "hit"
         else:
-            return "stay"
+            return "stand"
     elif hand.value == 13:
         if dealer.value > 16:
             return "hit"
         else:
-            return "stay"
+            return "stand"
     elif hand.value == 12:
         if dealer.value > 16:
             return "hit"
         else:
-            return "stay"
+            return "stand"
     elif hand.value == 11:
         return "double"
     elif hand.value == 10:
@@ -305,7 +328,7 @@ def decide_dealer_action(hand: Hand) -> str:
     while hand.value < 17:
         return "hit"
 
-    return "stay"
+    return "stand"
 
 
 def decide_winner(player: Hand, dealer: Hand) -> int:
