@@ -39,7 +39,7 @@ class Shoe:
 
         self.num_decks = num_decks
         self.get_cards()
-        self.last_card = int(0.2 * len(self.cards))
+        self.cut_card = int(0.2 * len(self.cards))
 
         # Burn a card
         _ = self.draw()
@@ -48,16 +48,13 @@ class Shoe:
     def is_active(self):
         """Determines if the shoe can support another game"""
 
-        return len(self.cards) > self.last_card
+        return len(self.cards) > self.cut_card
 
     def draw(self) -> Card:
         """Draws a card from the deck"""
 
         # Draw a card
         card = self.cards.pop()
-
-        # Check if the deck is still active
-        self.is_active = len(self.cards) > self.last_card
 
         return card
 
@@ -158,6 +155,12 @@ class Hand:
 
         return False
 
+    @property
+    def is_blackjack(self) -> bool:
+        """Determines if hand is a blackjack"""
+
+        return (len(self.cards) == 2) and (self.value == 21)
+
     def hit(self, card: Card):
         """Takes action to hit"""
 
@@ -206,19 +209,120 @@ class Player:
         """Takes an action to hit, stay, double, or split"""
 
         if action == "hit":
+            # Draw a card
             card = shoe.draw()
             self.hands[self.active_hand].hit(card)
+
+            # If hand is bust: move to next hand
             if self.hands[self.active_hand].is_hand_dead:
                 self.active_hand += 1
+
         elif action == "stay":
+            # Perform stay action
             self.hands[self.active_hand].stay()
+
+            # Move to next hand
             self.active_hand += 1
+
         elif action == "double":
+            # Draw a card
             card = shoe.draw()
             self.hands[self.active_hand].double(card)
+
+            # Move to next hand
             self.active_hand += 1
+
         elif action == "split":
+
+            # Draw two cards from deck
             card1 = shoe.draw()
             card2 = shoe.draw()
+
+            # Split the hands
             new_hand = self.hands[self.active_hand].split(card1, card2)
-            self.hands.insert(self.active_hand, new_hand)
+
+            # Insert new hand just being the active hand
+            self.hands.insert(self.active_hand + 1, new_hand)
+
+
+def decide_player_action(hand: Hand, dealer: Card, count: int = 0) -> str:
+    """Decides what action to take"""
+
+    if hand.value == 21:
+        return "stay"
+    elif hand.value == 20:
+        return "stay"
+    elif hand.value == 19:
+        return "stay"
+    elif hand.value == 18:
+        return "stay"
+    elif hand.value == 17:
+        return "stay"
+    elif hand.value == 16:
+        if dealer.value > 16:
+            return "hit"
+        else:
+            return "stay"
+    elif hand.value == 15:
+        if dealer.value > 16:
+            return "hit"
+        else:
+            return "stay"
+    elif hand.value == 14:
+        if dealer.value > 16:
+            return "hit"
+        else:
+            return "stay"
+    elif hand.value == 13:
+        if dealer.value > 16:
+            return "hit"
+        else:
+            return "stay"
+    elif hand.value == 12:
+        if dealer.value > 16:
+            return "hit"
+        else:
+            return "stay"
+    elif hand.value == 11:
+        return "double"
+    elif hand.value == 10:
+        if dealer.value < 10:
+            return "double"
+        else:
+            return "hit"
+    elif hand.value == 9:
+        if dealer.value < 17:
+            return "double"
+        else:
+            return "hit"
+
+    return "hit"
+
+
+def decide_dealer_action(hand: Hand) -> str:
+    """Decide action for the dealer"""
+
+    while hand.value < 17:
+        return "hit"
+
+    return "stay"
+
+
+def decide_winner(player: Hand, dealer: Hand) -> int:
+    """Decides the"""
+
+    if player.is_blackjack and (not dealer.is_blackjack):
+        # Winner winner chicken dinner!
+        return 1.5 * player.wager
+    elif player.value > 21:
+        # Player busts
+        return -player.wager
+    elif dealer.value > 21:
+        # Dealer busts
+        return player.wager
+    elif player.value > dealer.value:
+        # Player wins
+        return player.wager
+    elif player.value == dealer.value:
+        # Push
+        return 0
