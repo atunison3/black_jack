@@ -69,7 +69,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(player.hands[player.active_hand].value, 7)
 
         # Perform hit action
-        shoe = player.take_action("hit", shoe)  # 8 of Spades
+        shoe = player.take_action("H", shoe)  # 8 of Spades
 
         # Assert
         self.assertEqual(len(shoe.cards), 52 - 6)
@@ -77,7 +77,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(player.hands[player.active_hand].value, 15)
 
         # Perform hit action
-        shoe = player.take_action("hit", shoe)  # K of Clubs
+        shoe = player.take_action("H", shoe)  # K of Clubs
         self.assertEqual(len(shoe.cards), 52 - 7)
         self.assertEqual(len(player.hands), 1)
         self.assertEqual(player.hands[player.active_hand - 1].value, 25)
@@ -94,7 +94,7 @@ class TestPlayer(unittest.TestCase):
         player.deal(wager=1, card1=card1, card2=card2)
 
         # Player stands
-        shoe = player.take_action("stand", shoe)
+        shoe = player.take_action("S", shoe)
 
         # Assertions
         self.assertEqual(len(shoe.cards), 52 - 5)
@@ -113,9 +113,9 @@ class TestPlayer(unittest.TestCase):
         player.deal(wager=1, card1=card1, card2=card2)
 
         # Player stands
-        shoe = player.take_action("hit", shoe)
+        shoe = player.take_action("H", shoe)
         with self.assertRaises(IndexError):
-            shoe = player.take_action("stand", shoe)
+            shoe = player.take_action("S", shoe)
 
         # Situation: Player stands on a blackjack
         player = Player(cash=1)
@@ -127,7 +127,7 @@ class TestPlayer(unittest.TestCase):
         player.deal(wager=1, card1=card1, card2=card2)
 
         # Player stands
-        shoe = player.take_action("stand", shoe)
+        shoe = player.take_action("S", shoe)
 
         # Assertions
         self.assertEqual(len(shoe.cards), 52 - 5)
@@ -172,7 +172,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(len(player.hands), 1)
 
         # Perform splitting action
-        shoe = player.take_action("split", shoe)
+        shoe = player.take_action("P", shoe)
 
         # Post-split assertions
         self.assertEqual(len(player.hands), 2)
@@ -184,7 +184,7 @@ class TestPlayer(unittest.TestCase):
 
         # Perform further actions
         # Player's first hand can split 8's again
-        shoe = player.take_action("split", shoe)
+        shoe = player.take_action("P", shoe)
         self.assertEqual(len(player.hands), 3)
         self.assertEqual(player.active_hand, 0)
         self.assertEqual(player.hands[player.active_hand].value, 12)
@@ -195,9 +195,9 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(player.hands[2].can_split, False)
 
         # Perform further actions on first hand
-        shoe = player.take_action("hit", shoe)
-        shoe = player.take_action("hit", shoe)
-        shoe = player.take_action("hit", shoe)
+        shoe = player.take_action("H", shoe)
+        shoe = player.take_action("H", shoe)
+        shoe = player.take_action("H", shoe)
         self.assertEqual(len(player.hands), 3)
         self.assertEqual(player.active_hand, 1)
         self.assertEqual(player.hands[0].value, 22)
@@ -205,8 +205,8 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(player.hands[2].value, 19)
 
         # Perform actions on two split hands
-        shoe = player.take_action("stand", shoe)
-        shoe = player.take_action("stand", shoe)
+        shoe = player.take_action("S", shoe)
+        shoe = player.take_action("S", shoe)
         self.assertEqual(player.hands[1].value, 18)
         self.assertEqual(player.hands[2].value, 19)
         self.assertEqual(player.active_hand, 3)
@@ -221,7 +221,7 @@ class TestPlayer(unittest.TestCase):
         player.deal(wager=1, card1=card1, card2=card2)
 
         with self.assertRaises(InvalidAction):
-            shoe = player.take_action("split", shoe)
+            shoe = player.take_action("P", shoe)
 
         ## Testing player trying to split A's twice
         player = Player(cash=100)
@@ -231,7 +231,7 @@ class TestPlayer(unittest.TestCase):
         card2 = shoe.draw()
         _ = shoe.draw()  # Dealer card
         player.deal(wager=1, card1=card1, card2=card2)  # Has pair Aces
-        shoe = player.take_action("split", shoe)
+        shoe = player.take_action("P", shoe)
 
         # Player's hands are locked
         self.assertEqual(player.active_hand, 2)

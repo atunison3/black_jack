@@ -5,6 +5,14 @@ class InvalidAction(Exception):
     pass
 
 
+class NoActionError(Exception):
+    pass
+
+
+class NoStateError(Exception):
+    pass
+
+
 class Card:
     def __init__(self, suit: str, rank: str):
         self.suit = suit
@@ -160,10 +168,10 @@ class Hand:
 
     @property
     def can_hit(self) -> bool:
-        """Determines if hand can hit"""
+        """Determines if hand can H"""
 
         if (self.value >= 21) or (self.split_aces):
-            # Can't hit on 21 and can't hit after splitting aces
+            # Can't H on 21 and can't H after splitting aces
             return False
 
         return True
@@ -186,7 +194,7 @@ class Hand:
 
     @property
     def can_double(self) -> bool:
-        """Determines if hand can double"""
+        """Determines if hand can D"""
 
         if len(self.cards) != 2:
             return False
@@ -232,23 +240,23 @@ class Hand:
         return (len(self.cards) == 2) and (self.value == 21)
 
     def hit(self, card: Card):
-        """Takes action to hit"""
+        """Takes action to hit (H)"""
 
         self.cards.append(card)
 
     def stand(self):
-        """Takes action to stand"""
+        """Takes action to stand (S)"""
 
         self.stood = True
 
     def double(self, card: Card):
-        """Takes action to double"""
+        """Takes action to double (D)"""
 
         self.wager *= 2
         self.cards.append(card)
 
     def split(self, card1: Card, card2: Card) -> "Hand":
-        """Takes action to split the hand"""
+        """Takes action to split (P) the hand"""
 
         # Create a new hand
         if self.cards[1].rank == "A" and card2.rank == "A":
@@ -256,7 +264,7 @@ class Hand:
         else:
             new_hand = Hand(self.wager, self.cards[1], card2)
 
-        # Replace the "split" card with the new card
+        # Replace the "P" card with the new card
         self.cards[1] = card1
         if self.cards[0].rank == "A" and self.cards[1].rank == "A":
             self.split_aces = True
@@ -291,6 +299,9 @@ class Player:
     def deal(self, wager: int, card1: Card, card2: Card):
         """Deals a game"""
 
+        # Reset the player's hands
+        self.hands = []
+
         if wager > self.cash:
             raise ValueError("Wager must be less than or equal to player cash")
         if wager < 1:
@@ -301,9 +312,9 @@ class Player:
         self.active_hand = 0
 
     def take_action(self, action: str, shoe: Shoe) -> Shoe:
-        """Takes an action to hit, stand, double, or split"""
+        """Takes an action to H, S, D, or P"""
 
-        if action == "hit":
+        if action == "H":
             # Draw a card
             card = shoe.draw()
             self.hands[self.active_hand].hit(card)
@@ -312,19 +323,19 @@ class Player:
             if self.hands[self.active_hand].is_hand_locked:
                 self.active_hand += 1
 
-        elif action == "stand":
-            # Perform stand action
+        elif action == "S":
+            # Perform split action
             self.hands[self.active_hand].stand()
 
             # Move to next hand
             self.active_hand += 1
 
-        elif action == "double":
+        elif action == "D":
 
             # Get the hand's wager
             wager = self.hands[self.active_hand].wager
             if wager > self.cash:
-                raise InvalidAction("Player does not have cash to support double")
+                raise InvalidAction("Player does not have cash to support D")
             self.cash -= wager
 
             # Draw a card
@@ -334,7 +345,7 @@ class Player:
             # Move to next hand
             self.active_hand += 1
 
-        elif action == "split":
+        elif action == "P":
 
             # Get the hand's wager
             wager = self.hands[self.active_hand].wager
@@ -363,7 +374,7 @@ class Dealer:
     def __init__(self, card2: Card, card4: Card):
         self.hand = Hand(wager=1, card1=card2, card2=card4)
 
-    def should_hit(self, player: Player):
+    def should_H(self, player: Player):
         return self.hand.value < 17 and player.has_at_least_one_hand_in_play
 
     @property
@@ -374,7 +385,11 @@ class Dealer:
     def value(self):
         return self.hand.value
 
-    def hit(self, shoe: Shoe) -> Shoe:
+    @property
+    def is_blackjack(self):
+        return self.hand.is_blackjack
+
+    def H(self, shoe: Shoe) -> Shoe:
         """Draws a card"""
 
         card = shoe.draw()
@@ -383,58 +398,37 @@ class Dealer:
         return shoe
 
 
-def decide_player_action(hand: Hand, dealer: Dealer, count: int = 0) -> str:
-    """Decides what action to take"""
+def get_hand_state(hand: Hand) -> str:
+    """Gets the hand's state"""
 
-    if hand.value == 21:
-        return "stand"
-    elif hand.value == 20:
-        return "stand"
-    elif hand.value == 19:
-        return "stand"
-    elif hand.value == 18:
-        return "stand"
-    elif hand.value == 17:
-        return "stand"
-    elif hand.value == 16:
-        if dealer.upcard > 16:
-            return "hit"
-        else:
-            return "stand"
-    elif hand.value == 15:
-        if dealer.upcard > 16:
-            return "hit"
-        else:
-            return "stand"
-    elif hand.value == 14:
-        if dealer.upcard > 16:
-            return "hit"
-        else:
-            return "stand"
-    elif hand.value == 13:
-        if dealer.upcard > 16:
-            return "hit"
-        else:
-            return "stand"
-    elif hand.value == 12:
-        if dealer.upcard > 16:
-            return "hit"
-        else:
-            return "stand"
-    elif hand.value == 11:
-        return "double"
-    elif hand.value == 10:
-        if dealer.upcard < 10:
-            return "double"
-        else:
-            return "hit"
-    elif hand.value == 9:
-        if dealer.upcard < 17:
-            return "double"
-        else:
-            return "hit"
+    rank1 = hand.cards[0].rank
+    rank2 = hand.cards[1].rank
+    ranks = [rank1, rank2]
 
-    return "hit"
+    if hand.can_split:
+        if rank1 in ["A", "2", "3", "6", "7", "8", "9"]:
+            return rank1 * 2
+    if hand.is_hand_soft:
+        for i in ["2", "3", "4", "5", "6", "7", "8"]:
+            if i in ranks:
+                return "A" + i
+    if hand.value in [9, 10, 11, 12, 13, 14, 15, 16]:
+        return str(hand.value)
+    if hand.value == 8:
+        if "6" in ranks:
+            return "62"
+        elif "5" in ranks:
+            return "53"
+        elif "4" in ranks:
+            return "44"
+        else:
+            return "8"
+    if hand.value >= 17:
+        return "17"
+    if hand.value < 8:
+        return "7"
+
+    raise NoStateError(hand.cards)
 
 
 def decide_winner(player: Hand, dealer: Dealer) -> int:
@@ -464,6 +458,6 @@ def decide_dealer_action(hand: Hand) -> str:
     """Decide action for the dealer"""
 
     while hand.value < 17:
-        return "hit"
+        return "H"
 
-    return "stand"
+    return "S"
