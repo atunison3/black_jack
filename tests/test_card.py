@@ -68,6 +68,20 @@ class TestCard(unittest.TestCase):
         other = Card(suit="Heart", rank="Q")
         self.assertNotEqual(card, other)
 
+    def test_03_count_values(self):
+
+        for rank in ["2", "3", "4", "5", "6"]:
+            card = Card(suit="Diamond", rank=rank)
+            self.assertEqual(card.count_value, 1)
+
+        for rank in ["10", "J", "Q", "K", "A"]:
+            card = Card(suit="Diamond", rank=rank)
+            self.assertEqual(card.count_value, -1)
+
+        for rank in ["7", "8", "9"]:
+            card = Card(suit="Diamond", rank=rank)
+            self.assertEqual(card.count_value, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

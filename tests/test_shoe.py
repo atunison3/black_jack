@@ -63,6 +63,47 @@ class TestShoe(unittest.TestCase):
         self.assertEqual(shoe.draw(), Card(suit="Spade", rank="2"))
         self.assertEqual(len(shoe.cards), 100)
 
+    def test_04_cut_card(self):
+
+        # Verify cut_card is doing something
+        for num_decks in [1, 2, 3, 4]:
+            shoe = Shoe(num_decks)
+            self.assertEqual(shoe.cut_card, int(0.3 * num_decks * 52))
+
+        # Test the is_active
+        shoe = Shoe(num_decks=1)
+        n = int(0.3 * 52)
+        for _ in range(52 - n - 2):
+            _ = shoe.draw()
+        self.assertEqual(n, 15)
+        self.assertEqual(shoe.cut_card, 15)
+        self.assertEqual(len(shoe.cards), 16)
+        self.assertEqual(shoe.is_active, True)
+
+        _ = shoe.draw()
+        self.assertEqual(len(shoe.cards), 15)
+        self.assertEqual(shoe.is_active, False)
+
+    def test_05_keeping_count(self):
+
+        # Assumes all cards are visible
+        shoe = Shoe(num_decks=2, random_state=42)
+        for _ in range(10):
+            _ = shoe.draw()
+        self.assertEqual(shoe.count, 2)
+
+        # Check the visible parameter
+        shoe = Shoe(num_decks=1, random_state=43)
+        low_cards = [3, 4, 5, 6, 7, 13, 16, 20, 21, 22, 32, 34, 35, 36, 38, 40, 42, 46, 47]
+        for i in range(51):
+            if i in low_cards:
+                # Player sees it
+                _ = shoe.draw()
+            else:
+                # Player misses it
+                _ = shoe.draw(is_visible=False)
+        self.assertEqual(shoe.count, 19)
+
 
 if __name__ == "__main__":
     unittest.main

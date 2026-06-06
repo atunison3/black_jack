@@ -30,6 +30,14 @@ class Card:
         return hash(f"{self.rank} of {self.suit}s")
 
     @property
+    def count_value(self):
+        if self.rank in ["2", "3", "4", "5", "6"]:
+            return 1
+        elif self.rank in ["10", "J", "Q", "K", "A"]:
+            return -1
+        return 0
+
+    @property
     def value(self):
         return {
             "A": 11,
@@ -66,10 +74,12 @@ class Shoe:
         self.random_state = random_state
         self.num_decks = num_decks
         self.get_cards()
-        self.cut_card = int(0.2 * len(self.cards))
+        self.cut_card = int(0.3 * self.num_decks * 52)
+
+        self.count = 0
 
         # Burn a card
-        _ = self.draw()
+        _ = self.draw(is_visible=False)
 
     @property
     def is_active(self):
@@ -77,11 +87,14 @@ class Shoe:
 
         return len(self.cards) > self.cut_card
 
-    def draw(self) -> Card:
+    def draw(self, is_visible: bool = True) -> Card:
         """Draws a card from the deck"""
 
         # Draw a card
         card = self.cards.pop()
+
+        if is_visible:
+            self.count += card.count_value
 
         return card
 
@@ -264,6 +277,17 @@ class Player:
         self.hands = []
         self.active_hand = None
 
+    @property
+    def still_active(self):
+        return self.active_hand < len(self.hands)
+
+    @property
+    def has_at_least_one_hand_in_play(self):
+        for hand in self.hands:
+            if hand.value <= 21:
+                return True
+        return False
+
     def deal(self, wager: int, card1: Card, card2: Card):
         """Deals a game"""
 
@@ -335,7 +359,31 @@ class Player:
         return shoe
 
 
-def decide_player_action(hand: Hand, dealer: Card, count: int = 0) -> str:
+class Dealer:
+    def __init__(self, card2: Card, card4: Card):
+        self.hand = Hand(wager=1, card1=card2, card2=card4)
+
+    def should_hit(self, player: Player):
+        return self.hand.value < 17 and player.has_at_least_one_hand_in_play
+
+    @property
+    def upcard(self):
+        return self.hand.cards[0].value
+
+    @property
+    def value(self):
+        return self.hand.value
+
+    def hit(self, shoe: Shoe) -> Shoe:
+        """Draws a card"""
+
+        card = shoe.draw()
+        self.hand.hit(card)
+
+        return shoe
+
+
+def decide_player_action(hand: Hand, dealer: Dealer, count: int = 0) -> str:
     """Decides what action to take"""
 
     if hand.value == 21:
@@ -349,39 +397,39 @@ def decide_player_action(hand: Hand, dealer: Card, count: int = 0) -> str:
     elif hand.value == 17:
         return "stand"
     elif hand.value == 16:
-        if dealer.value > 16:
+        if dealer.upcard > 16:
             return "hit"
         else:
             return "stand"
     elif hand.value == 15:
-        if dealer.value > 16:
+        if dealer.upcard > 16:
             return "hit"
         else:
             return "stand"
     elif hand.value == 14:
-        if dealer.value > 16:
+        if dealer.upcard > 16:
             return "hit"
         else:
             return "stand"
     elif hand.value == 13:
-        if dealer.value > 16:
+        if dealer.upcard > 16:
             return "hit"
         else:
             return "stand"
     elif hand.value == 12:
-        if dealer.value > 16:
+        if dealer.upcard > 16:
             return "hit"
         else:
             return "stand"
     elif hand.value == 11:
         return "double"
     elif hand.value == 10:
-        if dealer.value < 10:
+        if dealer.upcard < 10:
             return "double"
         else:
             return "hit"
     elif hand.value == 9:
-        if dealer.value < 17:
+        if dealer.upcard < 17:
             return "double"
         else:
             return "hit"
@@ -389,16 +437,7 @@ def decide_player_action(hand: Hand, dealer: Card, count: int = 0) -> str:
     return "hit"
 
 
-def decide_dealer_action(hand: Hand) -> str:
-    """Decide action for the dealer"""
-
-    while hand.value < 17:
-        return "hit"
-
-    return "stand"
-
-
-def decide_winner(player: Hand, dealer: Hand) -> int:
+def decide_winner(player: Hand, dealer: Dealer) -> int:
     """Decides the"""
 
     if player.is_blackjack and (not dealer.is_blackjack):
@@ -418,3 +457,13 @@ def decide_winner(player: Hand, dealer: Hand) -> int:
     elif player.value == dealer.value:
         # Push
         return 0
+
+
+# Deprecating this
+def decide_dealer_action(hand: Hand) -> str:
+    """Decide action for the dealer"""
+
+    while hand.value < 17:
+        return "hit"
+
+    return "stand"
