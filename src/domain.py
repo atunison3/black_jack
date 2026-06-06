@@ -1,4 +1,8 @@
-from numpy.random import shuffle
+from numpy.random import shuffle, default_rng, seed
+
+
+class InvalidAction(Exception):
+    pass
 
 
 class Card:
@@ -33,10 +37,18 @@ class Card:
 
 
 class Shoe:
-    def __init__(self, num_decks: int):
+    def __init__(self, num_decks: int, random_state: int | None = None):
         if num_decks < 1:
             raise ValueError("Number of decks must be greater than 0.")
 
+        if not isinstance(random_state, int | None):
+            raise TypeError("Random state must be int or None")
+
+        if random_state:
+            if (random_state < 0) or (random_state > (2**32 - 1)):
+                raise ValueError("Random state out of bounds")
+
+        self.random_state = random_state
         self.num_decks = num_decks
         self.get_cards()
         self.cut_card = int(0.2 * len(self.cards))
@@ -57,6 +69,16 @@ class Shoe:
         card = self.cards.pop()
 
         return card
+
+    def shuffle_cards(self):
+        """Shuffles the shoe with seed"""
+
+        if self.random_state:
+            seed(self.random_state)
+        else:
+            default_rng()
+
+        shuffle(self.cards)
 
     def get_cards(self):
         """Builds the shoe"""
@@ -81,7 +103,7 @@ class Shoe:
                 ]:
                     self.cards.append(Card(suit=suit, rank=rank))
 
-        shuffle(self.cards)
+        self.shuffle_cards()
 
 
 class Hand:
@@ -215,6 +237,9 @@ class Hand:
 class Player:
     def __init__(self, cash: int):
 
+        if not isinstance(cash, int):
+            raise TypeError("Cash must be an integer")
+
         if cash < 1:
             raise ValueError("Cash must be greater than 0")
 
@@ -225,10 +250,16 @@ class Player:
     def deal(self, wager: int, card1: Card, card2: Card):
         """Deals a game"""
 
+        if wager > self.cash:
+            raise ValueError("Wager must be less than or equal to player cash")
+        if wager < 1:
+            raise ValueError("Wager must be greater than 0.")
+
+        self.cash -= wager
         self.hands.append(Hand(wager=wager, card1=card1, card2=card2))
         self.active_hand = 0
 
-    def decide(self, action: str, shoe: Shoe) -> None:
+    def take_action(self, action: str, shoe: Shoe) -> Shoe:
         """Takes an action to hit, stand, double, or split"""
 
         if action == "hit":
@@ -248,6 +279,13 @@ class Player:
             self.active_hand += 1
 
         elif action == "double":
+
+            # Get the hand's wager
+            wager = self.hands[self.active_hand].wager
+            if wager > self.cash:
+                raise InvalidAction("Player does not have cash to support double")
+            self.cash -= wager
+
             # Draw a card
             card = shoe.draw()
             self.hands[self.active_hand].double(card)
@@ -256,6 +294,12 @@ class Player:
             self.active_hand += 1
 
         elif action == "split":
+
+            # Get the hand's wager
+            wager = self.hands[self.active_hand].wager
+            if wager > self.cash:
+                raise InvalidAction("Player does not have cash to support splitting")
+            self.cash -= wager
 
             # Draw two cards from deck
             card1 = shoe.draw()
@@ -266,6 +310,8 @@ class Player:
 
             # Insert new hand just being the active hand
             self.hands.insert(self.active_hand + 1, new_hand)
+
+        return shoe
 
 
 def decide_player_action(hand: Hand, dealer: Card, count: int = 0) -> str:
