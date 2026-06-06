@@ -5,22 +5,24 @@ count = 0
 while count < 2**32 - 1:
     shoe = Shoe(num_decks=1, random_state=count)
 
-    if (card1 := shoe.draw()).rank != "A":
-        count += 1
-        continue
-
-    card2 = shoe.draw()  # Dealer
-    if (card3 := shoe.draw()).rank != "A":
-        count += 1
-        continue
-
+    card1 = shoe.draw()
+    card2 = shoe.draw()
+    card3 = shoe.draw()
     card4 = shoe.draw()
-    if (card5 := shoe.draw()).rank == "A":
+
+    player = Hand(wager=1, card1=card1, card2=card3)
+    dealer = Hand(wager=1, card1=card2, card2=card4)
+
+    if dealer.value in [21]:
+
         print(count)
         break
 
     count += 1
 
-show = Shoe(num_decks=1, random_state=count)
-for _ in range(6):
-    print(show.draw())
+print("Player:")
+for card in player.cards:
+    print(f"\t{card}")
+print("Dealer:")
+for card in dealer.cards:
+    print(f"\t{card}")

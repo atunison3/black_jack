@@ -313,6 +313,10 @@ class Player:
             # Insert new hand just being the active hand
             self.hands.insert(self.active_hand + 1, new_hand)
 
+            # Iterate active hand if split was aces
+            if self.hands[self.active_hand].cards[0].rank == "A":
+                self.active_hand += 2  # Cycles two hands
+
         return shoe
 
 
@@ -394,6 +398,8 @@ def decide_winner(player: Hand, dealer: Hand) -> int:
     elif player.value > dealer.value:
         # Player wins
         return player.wager
+    elif player.value < dealer.value:
+        return -player.wager
     elif player.value == dealer.value:
         # Push
         return 0
