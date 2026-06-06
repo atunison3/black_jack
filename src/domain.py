@@ -374,7 +374,7 @@ class Dealer:
     def __init__(self, card2: Card, card4: Card):
         self.hand = Hand(wager=1, card1=card2, card2=card4)
 
-    def should_H(self, player: Player):
+    def should_hit(self, player: Player):
         return self.hand.value < 17 and player.has_at_least_one_hand_in_play
 
     @property
@@ -389,7 +389,7 @@ class Dealer:
     def is_blackjack(self):
         return self.hand.is_blackjack
 
-    def H(self, shoe: Shoe) -> Shoe:
+    def hit(self, shoe: Shoe) -> Shoe:
         """Draws a card"""
 
         card = shoe.draw()
