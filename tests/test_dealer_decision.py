@@ -3,7 +3,7 @@ import unittest
 from src.domain import Card, Hand, decide_dealer_action
 
 
-class TestCard(unittest.TestCase):
+class TestDealerActions(unittest.TestCase):
     cards = {}
     for rank in ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]:
         cards[rank] = Card(suit="Diamond", rank=rank)
@@ -13,27 +13,27 @@ class TestCard(unittest.TestCase):
         for rank in ["7", "8", "9", "10", "J", "Q", "K", "A"]:
             hand = Hand(wager=1, card1=self.cards["10"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stay")
+            self.assertEqual(action, "stand")
 
         for rank in ["8", "9", "10", "J", "Q", "K", "A"]:
             hand = Hand(wager=1, card1=self.cards["9"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stay")
+            self.assertEqual(action, "stand")
 
         for rank in ["9", "10", "J", "Q", "K", "A"]:
             hand = Hand(wager=1, card1=self.cards["8"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stay")
+            self.assertEqual(action, "stand")
 
         for rank in ["10", "J", "Q", "K", "A"]:
             hand = Hand(wager=1, card1=self.cards["7"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stay")
+            self.assertEqual(action, "stand")
 
         for rank in ["A"]:
             hand = Hand(wager=1, card1=self.cards["6"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stay")
+            self.assertEqual(action, "stand")
 
     def test_dealer_hits(self):
 
