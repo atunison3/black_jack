@@ -13,27 +13,27 @@ class TestDealerActions(unittest.TestCase):
         for rank in ["7", "8", "9", "10", "J", "Q", "K", "A"]:
             hand = Hand(wager=1, card1=self.cards["10"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stand")
+            self.assertEqual(action, "S")
 
         for rank in ["8", "9", "10", "J", "Q", "K", "A"]:
             hand = Hand(wager=1, card1=self.cards["9"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stand")
+            self.assertEqual(action, "S")
 
         for rank in ["9", "10", "J", "Q", "K", "A"]:
             hand = Hand(wager=1, card1=self.cards["8"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stand")
+            self.assertEqual(action, "S")
 
         for rank in ["10", "J", "Q", "K", "A"]:
             hand = Hand(wager=1, card1=self.cards["7"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stand")
+            self.assertEqual(action, "S")
 
         for rank in ["A"]:
             hand = Hand(wager=1, card1=self.cards["6"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "stand")
+            self.assertEqual(action, "S")
 
     def test_dealer_hits(self):
 
@@ -41,12 +41,12 @@ class TestDealerActions(unittest.TestCase):
             for rank2 in ["2", "3", "4", "5", "5"]:
                 hand = Hand(wager=1, card1=self.cards[rank], card2=self.cards[rank2])
                 action = decide_dealer_action(hand)
-                self.assertEqual(action, "hit")
+                self.assertEqual(action, "H")
 
         for rank in ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]:
             hand = Hand(wager=1, card1=self.cards["6"], card2=self.cards[rank])
             action = decide_dealer_action(hand)
-            self.assertEqual(action, "hit")
+            self.assertEqual(action, "H")
 
 
 if __name__ == "__main__":

@@ -1,13 +1,17 @@
-from domain import Shoe, Player, decide_player_action, Dealer, decide_winner
+import matplotlib.pyplot as plt  # noqa: F401
+
+from domain import Shoe, Player, Dealer, decide_winner, get_hand_state
+from player_actions import decide_player_action
 
 
-def shoe_round(player_cash: int):
+def game_round(wager: int = 10, player_cash: int = 300):
 
+    # Initiate player
     player = Player(player_cash)
 
     shoe = Shoe(num_decks=2)
 
-    while (shoe.is_active) and (player.cash > 0):
+    while (shoe.is_active) and (player.cash >= wager):
 
         # Dish out initial cards
         card1 = shoe.draw()
@@ -19,7 +23,10 @@ def shoe_round(player_cash: int):
 
         # Player makes their moves
         while player.still_active:
-            action = decide_player_action(player.hands[player.active_hand], dealer)
+            state = get_hand_state(player.hands[player.active_hand])
+            count = shoe.count
+            action = decide_player_action(state, dealer, count)
+            print(f"\t{state:>2}   {dealer.upcard:>2}   {['NEG', 'POS'][count>0]:>3}  {action}")
             shoe = player.take_action(action, shoe)
 
         while dealer.should_hit(player):
@@ -29,7 +36,5 @@ def shoe_round(player_cash: int):
             winnings = decide_winner(hand, dealer)
             player.cash += winnings
 
-        print(player.cash)
 
-
-shoe_round(300)
+game_round()
