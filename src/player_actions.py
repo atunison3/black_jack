@@ -241,3 +241,158 @@ def decide_player_action(state: str, dealer: Dealer, count: int = 0) -> str:
         raise NoActionError(f"No action for {state} - {dv} - {count}")
     else:
         raise NoActionError(f"No action for {state} - {dv} - {count}")
+
+
+def decide_player_action1(state: str, dealer: Dealer, count: int = 0) -> str:
+    """Decides what action to take"""
+
+    count = count > 0
+    dv = dealer.upcard
+
+    # Cover the basics
+    if state == "8-3":
+        return "H"
+    elif state == "9":
+        if dv in [2, 7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [3, 4, 5, 6]:
+            return "D"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "10":
+        if dv in [2, 3, 4, 5, 6, 7, 8, 9]:
+            return "D"
+        elif dv in [10, 11]:
+            return "H"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "11":
+        if dv in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
+            return "D"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "12":
+        if dv in [2, 3, 7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [4, 5, 6]:
+            return "S"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "13":
+        if dv in [7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [2, 3, 4, 5, 6]:
+            return "S"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "14":
+        if dv in [7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [2, 3, 4, 5, 6]:
+            return "S"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "15":
+        if dv in [7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [2, 3, 4, 5, 6]:
+            return "S"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "16":
+        if dv in [7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [2, 3, 4, 5, 6]:
+            return "S"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "A-2":
+        if dv in [2, 3, 7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [4, 5, 6]:
+            return "D"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "A-3":
+        if dv in [2, 3, 7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [4, 5, 6]:
+            return "D"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "A-4":
+        if dv in [2, 3, 7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [4, 5, 6]:
+            return "D"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "A-5":
+        if dv in [2, 3, 7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [4, 5, 6]:
+            return "D"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "A-6":
+        if dv in [2, 3, 7, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [4, 5, 6]:
+            return "D"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "A-7":
+        if dv in [2, 7, 8]:
+            return "S"
+        elif dv in [3, 4, 5, 6]:
+            return "D"
+        elif dv in [9, 10, 11]:
+            return "H"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "A-8":
+        if dv in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
+            return "S"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "A-9":
+        if dv in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
+            return "S"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "2-2":
+        if dv in [2, 3, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [4, 5, 6, 7]:
+            return "P"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "3-3":
+        if dv in [2, 3, 8, 9, 10, 11]:
+            return "H"
+        elif dv in [4, 5, 6, 7]:
+            return "P"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "4-4":
+        if dv in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
+            return "H"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "5-5":
+        if dv in [2, 3, 4, 5, 6, 7, 8, 9]:
+            return "D"
+        if dv in [10, 11]:
+            return "H"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "6-6":
+        if dv in [2, 3, 4, 5, 6]:
+            return "P"
+        elif dv in [7, 8, 9, 10, 11]:
+            return "H"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "7-7":
+        if dv in [2, 3, 4, 5, 6]:
+            return "P"
+        elif dv in [7, 8, 9, 10, 11]:
+            return "H"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "8-8":
+        if dv in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
+            return "SP"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "9-9":
+        if dv in [2, 3, 4, 5, 6, 8, 9]:
+            return "P"
+        elif dv in [7, 10, 11]:
+            return "S"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "10-10":
+        if dv in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
+            return "S"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
+    elif state == "11-11":
+        if dv in [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]:
+            return "P"
+        raise NoActionError(f"No action for {state} - {dv} - {count}")
